@@ -36,7 +36,7 @@ namespace GON.Extensions
                 return true;
 
             if (!tag.IsSingleByteTag())
-                return tag.bin().Skip(1).SkipWhile(x => x.IsLastTagByte()).Count() == 1;
+                return tag.bin().Skip(1).SkipWhile(x => !x.IsLastTagByte()).Count() == 1;
 
             return false;
         }
@@ -64,7 +64,7 @@ namespace GON.Extensions
                     }
                     else if (stage == 1) //Take Tag bytes
                     {
-                        if (bt.IsLastTagByte())
+                        if (!bt.IsLastTagByte())
                         {
                             return true;
                         }
@@ -129,13 +129,13 @@ namespace GON.Extensions
                 }
                 else if (stage == 1)
                 {
-                    if (bt.IsLastTagByte())
+                    if (!bt.IsLastTagByte())
                         return true;
                     stage++;
                     return true;
                 }
                 return false;
-            });
+            }).ToArray();
         }
 
         public static IEnumerable<byte> GetTlvLenBytes(this IEnumerable<byte> arr)
@@ -204,6 +204,9 @@ namespace GON.Extensions
             if (len > 65535)
                 throw new ArgumentException("Value should be less than 65536");
 
+            if (len < 0xFF)
+                return new byte[] { (byte)len };
+
             var val = BitConverter.GetBytes(len).Reverse().SkipWhile(x => x == 0).ToArray();
             var ret = new byte[] { 0xFF, 0x00, 0x00 };
             if (val.Length == 2)
@@ -213,7 +216,7 @@ namespace GON.Extensions
             }
             else if (val.Length == 1)
             {
-                ret[1] = val[0];
+                ret[2] = val[0];
             }
             return ret;
         }
@@ -232,9 +235,9 @@ namespace GON.Extensions
         public static byte[] EMVPadding(this byte[] pBuf) => EMVPadding(pBuf, (((int)(pBuf.Length / 8)) + 1) * 8);
 
         public static byte[] WrapTlv(this byte[] val, byte[] tag) => tag.Combine(new byte[][] { val.Length.ToTlvLen(), val });
-        public static byte[] WrapTlv(this byte[] val, string tag) => tag.bin().WrapTlv(val);
-        public static string WrapTlv(this string val, string tag) => tag.bin().WrapTlv(val).hex();
-        public static string WrapTlv(this string val, byte[] tag) => tag.WrapTlv(val).hex();
+        public static byte[] WrapTlv(this byte[] val, string tag) => val.WrapTlv(tag.bin());
+        public static string WrapTlv(this string val, string tag) => val.bin().WrapTlv(tag).hex();
+        public static string WrapTlv(this string val, byte[] tag) => val.bin().WrapTlv(tag).hex();
 
         public static IEnumerable<IEnumerable<byte>> WrapApdu(this byte[] val, byte[] command)
         {
@@ -264,9 +267,9 @@ namespace GON.Extensions
         public static string FindTag(this string buf, string cmp) => buf.bin().FindTag(cmp.bin())?.hex();
 
         public static byte[] WrapSimpleTlv(this byte[] val, byte[] tag) => tag.Combine(new byte[][] { val.Length.ToSimpleTlvLen(), val });
-        public static byte[] WrapSimpleTlv(this byte[] val, string tag) => tag.bin().WrapSimpleTlv(val);
-        public static string WrapSimpleTlv(this string val, string tag) => tag.bin().WrapSimpleTlv(val).hex();
-        public static string WrapSimpleTlv(this string val, byte[] tag) => tag.WrapSimpleTlv(val).hex();
+        public static byte[] WrapSimpleTlv(this byte[] val, string tag) => val.WrapSimpleTlv(tag.bin());
+        public static string WrapSimpleTlv(this string val, string tag) => val.bin().WrapSimpleTlv(tag).hex();
+        public static string WrapSimpleTlv(this string val, byte[] tag) => val.bin().WrapSimpleTlv(tag).hex();
 
         public static IDictionary<string, string> ToTlvDictionary(this string str) => str.SplitToTlvStrings().ToDictionary<string, string>(k => k.GetTlvTagHex());
         public static IDictionary<string, byte[]> ToTlvDictionary(this IEnumerable<byte> buf) => buf.SplitToTlvArrays().ToDictionary(k => k.GetTlvTagBytes().hex());
@@ -298,7 +301,7 @@ namespace GON.Extensions
         //Bit 8 of each subsequent byte shall be set to 1, unless it is the last subsequent byte.
         //Bits 7 to 1 of the first subsequent byte shall not be all set to 0.
         //Bits 7 to 1 of the first subsequent byte, followed by bits 7 to 1 of each further subsequent byte, up to and including bits 7 to 1 of the last subsequent byte encode a tag number.
-        public static bool IsLastTagByte(this byte bt) => (bt >> 7) == 1;
+        public static bool IsLastTagByte(this byte bt) => (bt >> 7) == 0;
 
     }
 }
