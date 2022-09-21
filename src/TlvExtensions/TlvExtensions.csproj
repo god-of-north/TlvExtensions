@@ -4,8 +4,8 @@
     <TargetFrameworks>netstandard1.0;net35</TargetFrameworks>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>GON.TlvExtensions</Title>
-    <FileVersion>1.1.0.0</FileVersion>
-    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.2</FileVersion>
+    <AssemblyVersion>1.1.0.2</AssemblyVersion>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/god-of-north/TlvExtensions</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -13,9 +13,11 @@
     <PackageProjectUrl>https://github.com/god-of-north/TlvExtensions</PackageProjectUrl>
     <Description>.Net Extenstions to simplify work with SIMPLE-TLV and BER-TLV arrays</Description>
     <PackageId>GON.TlvExtensions</PackageId>
-    <Version>1.1.0</Version>
+    <Version>1.1.2</Version>
     <Authors>Maksym Lesyk</Authors>
     <Product>GON.TlvExtensions</Product>
+    <AssemblyName>GON.TlvExtensions</AssemblyName>
+    <RootNamespace>GON.Extensions</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="GON.HexadecimalStringExtensions" Version="1.2.0" />
+    <PackageReference Include="GON.HexadecimalStringExtensions" Version="1.2.1" />
   </ItemGroup>
 
 </Project>
